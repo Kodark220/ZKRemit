@@ -1,0 +1,27 @@
+{
+  "name": "zkremit",
+  "version": "1.0.0",
+  "description": "ZKRemit - ZK-Compliant Cross-Border Remittance Protocol on HashKey Chain",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:testnet": "npx hardhat run scripts/deploy.js --network hashkeyTestnet",
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network hashkeyMainnet",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "server": "cd backend && node server.js",
+    "setup:zk": "node scripts/setup-zk.js",
+    "generate-proof": "node scripts/generate-proof.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "circomlib": "^2.0.5",
+    "snarkjs": "^0.7.4",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.9.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  }
+}

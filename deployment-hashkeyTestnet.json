@@ -1,0 +1,10 @@
+{
+  "network": "hashkeyTestnet",
+  "complianceVerifier": "0x8f0b5DBFb49D60da3541B2aB0788daae58cb1E49",
+  "kycSBT": "0xB5F07915ac7EE30E408B69e2c9C2F4DE9f26e1ce",
+  "hspSettlement": "0x518D4798c3Be707D5331A8E4EB6Be68F9b88406e",
+  "zkRemitCore": "0xF53724F3Ec0E954f1EdcEe9bCb01AE5FD385d912",
+  "usdt": "0xa9aB92ade910e066e3d8012b2544dFBC479576D9",
+  "deployer": "0x15640DCF8b417aE491f3CE028a9518C8B8754438",
+  "timestamp": "2026-04-13T12:32:18.248Z"
+}
