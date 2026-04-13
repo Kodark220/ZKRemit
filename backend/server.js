@@ -47,20 +47,32 @@ const ZKREMIT_ABI = [
   "function totalOrders() view returns (uint256)",
 ];
 
-// Load deployment config
+// Load deployment config — tries env vars first, then local JSON file
 let contracts = {};
 try {
-  const fs = require("fs");
-  const path = require("path");
-  const deployment = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "..", "deployment-hashkeyTestnet.json"), "utf8")
-  );
-  contracts = {
-    hsp: new ethers.Contract(deployment.hspSettlement, HSP_ABI, provider),
-    zkRemit: new ethers.Contract(deployment.zkRemitCore, ZKREMIT_ABI, provider),
-    usdt: deployment.usdt,
-  };
-  console.log("Loaded deployment config for", deployment.network);
+  const hspAddr = process.env.HSP_SETTLEMENT;
+  const zkRemitAddr = process.env.ZKREMIT_CORE;
+  const usdtAddr = process.env.USDT_ADDRESS;
+
+  if (hspAddr && zkRemitAddr) {
+    contracts = {
+      hsp: new ethers.Contract(hspAddr, HSP_ABI, provider),
+      zkRemit: new ethers.Contract(zkRemitAddr, ZKREMIT_ABI, provider),
+      usdt: usdtAddr || ethers.ZeroAddress,
+    };
+    console.log("Loaded contracts from env vars");
+  } else {
+    const fs = require("fs");
+    const deployment = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "deployment-hashkeyTestnet.json"), "utf8")
+    );
+    contracts = {
+      hsp: new ethers.Contract(deployment.hspSettlement, HSP_ABI, provider),
+      zkRemit: new ethers.Contract(deployment.zkRemitCore, ZKREMIT_ABI, provider),
+      usdt: deployment.usdt,
+    };
+    console.log("Loaded deployment config for", deployment.network);
+  }
 } catch {
   console.log("No deployment found. API will run in demo mode.");
 }
@@ -270,8 +282,17 @@ app.post("/api/proof/generate", async (req, res) => {
 // Contract addresses
 app.get("/api/contracts", (req, res) => {
   try {
+    if (process.env.HSP_SETTLEMENT) {
+      return res.json({
+        network: "hashkey-testnet",
+        complianceVerifier: process.env.COMPLIANCE_VERIFIER || ethers.ZeroAddress,
+        kycSBT: process.env.KYC_SBT || ethers.ZeroAddress,
+        hspSettlement: process.env.HSP_SETTLEMENT,
+        zkRemitCore: process.env.ZKREMIT_CORE || ethers.ZeroAddress,
+        usdt: process.env.USDT_ADDRESS || ethers.ZeroAddress,
+      });
+    }
     const fs = require("fs");
-    const path = require("path");
     const deployment = JSON.parse(
       fs.readFileSync(path.join(__dirname, "..", "deployment-hashkeyTestnet.json"), "utf8")
     );
@@ -288,9 +309,12 @@ app.get("/api/contracts", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`ZKRemit API running on http://localhost:${PORT}`);
-  console.log(`Mode: ${contracts.hsp ? "live" : "demo"}`);
-});
+// Only listen when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`ZKRemit API running on http://localhost:${PORT}`);
+    console.log(`Mode: ${contracts.hsp ? "live" : "demo"}`);
+  });
+}
 
 module.exports = app;
