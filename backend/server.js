@@ -292,3 +292,5 @@ app.listen(PORT, () => {
   console.log(`ZKRemit API running on http://localhost:${PORT}`);
   console.log(`Mode: ${contracts.hsp ? "live" : "demo"}`);
 });
+
+module.exports = app;
