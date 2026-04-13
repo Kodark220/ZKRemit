@@ -45,15 +45,8 @@ import {
   type Transaction,
   type Stats,
 } from "@/lib/api";
-import {
-  connectWallet,
-  switchToHashKey,
-  shortenAddress,
-  onAccountsChanged,
-  onChainChanged,
-  initialWalletState,
-  type WalletState,
-} from "@/lib/wallet";
+import { shortenAddress } from "@/lib/wallet";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 // ── Animation Variants ──────────────────────────────────────────────
 const fadeInUp = {
@@ -79,40 +72,20 @@ const slideInLeft = {
 
 // ── Main Page ──────────────────────────────────────────────────────
 export default function Home() {
-  const [wallet, setWallet] = useState<WalletState>(initialWalletState);
+  const { login, logout, authenticated, ready, user } = usePrivy();
+  const { wallets } = useWallets();
   const [activeTab, setActiveTab] = useState("send");
-  const [connecting, setConnecting] = useState(false);
 
-  const handleConnect = async () => {
-    setConnecting(true);
-    try {
-      const state = await connectWallet();
-      setWallet(state);
-      if (!state.isCorrectChain) {
-        await switchToHashKey();
-        const updated = await connectWallet();
-        setWallet(updated);
-      }
-    } catch (err: any) {
-      console.error("Connect failed:", err.message);
-    } finally {
-      setConnecting(false);
-    }
+  const activeWallet = wallets[0];
+  const walletAddress = activeWallet?.address || user?.wallet?.address || null;
+  const isConnected = authenticated && !!walletAddress;
+
+  // Simple wallet state object for child components
+  const wallet = {
+    address: walletAddress,
+    isConnected,
+    isCorrectChain: true, // Privy handles chain via config
   };
-
-  useEffect(() => {
-    const unsub1 = onAccountsChanged((accounts) => {
-      if (!accounts.length) {
-        setWallet(initialWalletState);
-      } else {
-        connectWallet().then(setWallet).catch(console.error);
-      }
-    });
-    const unsub2 = onChainChanged(() => {
-      connectWallet().then(setWallet).catch(console.error);
-    });
-    return () => { unsub1(); unsub2(); };
-  }, []);
 
   return (
     <>
@@ -143,19 +116,19 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-3">
-              {!wallet.isCorrectChain && wallet.isConnected && (
-                <Button size="sm" variant="destructive" onClick={switchToHashKey}>
-                  Switch Network
-                </Button>
-              )}
               {wallet.isConnected ? (
-                <div className="flex items-center gap-2 rounded-full border border-border/60 bg-secondary/50 px-3 py-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="font-mono text-sm">{shortenAddress(wallet.address!)}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-full border border-border/60 bg-secondary/50 px-3 py-1.5">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="font-mono text-sm">{shortenAddress(wallet.address!)}</span>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={logout} className="rounded-full text-xs text-muted-foreground">
+                    Logout
+                  </Button>
                 </div>
               ) : (
-                <Button onClick={handleConnect} disabled={connecting} size="sm" className="rounded-full px-4">
-                  {connecting ? (
+                <Button onClick={login} disabled={!ready} size="sm" className="rounded-full px-4">
+                  {!ready ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Wallet className="mr-2 h-4 w-4" />
@@ -244,7 +217,7 @@ export default function Home() {
                 transition={{ duration: 0.2 }}
               >
                 <TabsContent value="send" forceMount={activeTab === "send" ? true : undefined} className={activeTab !== "send" ? "hidden" : ""}>
-                  <SendTab wallet={wallet} onConnect={handleConnect} />
+                  <SendTab wallet={wallet} onConnect={login} />
                 </TabsContent>
                 <TabsContent value="history" forceMount={activeTab === "history" ? true : undefined} className={activeTab !== "history" ? "hidden" : ""}>
                   <HistoryTab wallet={wallet} />
@@ -285,7 +258,7 @@ export default function Home() {
 }
 
 // ── Send Tab ──────────────────────────────────────────────────────
-function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => void }) {
+function SendTab({ wallet, onConnect }: { wallet: { address: string | null; isConnected: boolean; isCorrectChain: boolean }; onConnect: () => void }) {
   const [corridor, setCorridor] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -554,7 +527,7 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
 }
 
 // ── History Tab ───────────────────────────────────────────────────
-function HistoryTab({ wallet }: { wallet: WalletState }) {
+function HistoryTab({ wallet }: { wallet: { address: string | null; isConnected: boolean } }) {
   const [txns, setTxns] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
 

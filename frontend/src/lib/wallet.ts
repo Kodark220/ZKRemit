@@ -1,22 +1,22 @@
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
-const HASHKEY_TESTNET = {
+export const HASHKEY_TESTNET = {
   chainId: "0x85",
+  chainIdDecimal: 133,
   chainName: "HashKey Chain Testnet",
   nativeCurrency: { name: "HSK", symbol: "HSK", decimals: 18 },
   rpcUrls: ["https://testnet.hsk.xyz"],
   blockExplorerUrls: ["https://testnet.hashkeyscan.io"],
 };
 
-const HASHKEY_MAINNET = {
+export const HASHKEY_MAINNET = {
   chainId: "0xB1",
+  chainIdDecimal: 177,
   chainName: "HashKey Chain",
   nativeCurrency: { name: "HSK", symbol: "HSK", decimals: 18 },
   rpcUrls: ["https://mainnet.hsk.xyz"],
   blockExplorerUrls: ["https://hashkeyscan.io"],
 };
-
-const TARGET_CHAIN = HASHKEY_TESTNET;
 
 export interface WalletState {
   address: string | null;
@@ -33,6 +33,20 @@ export const initialWalletState: WalletState = {
   isCorrectChain: false,
   signer: null,
 };
+
+export function shortenAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+/** Get a signer from any EIP-1193 provider (Privy or MetaMask) */
+export async function getSignerFromProvider(provider: any): Promise<JsonRpcSigner> {
+  const ethersProvider = new BrowserProvider(provider);
+  return ethersProvider.getSigner();
+}
+
+// ── Legacy functions (kept for backward compat) ──
+
+const TARGET_CHAIN = HASHKEY_TESTNET;
 
 function getEthereum(): any | null {
   if (typeof window !== "undefined") {
@@ -83,10 +97,6 @@ export async function switchToHashKey(): Promise<void> {
       throw err;
     }
   }
-}
-
-export function shortenAddress(address: string): string {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 export function onAccountsChanged(callback: (accounts: string[]) => void): () => void {
