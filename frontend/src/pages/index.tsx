@@ -10,6 +10,7 @@ import {
   Globe,
   Wallet,
   ArrowRight,
+  ArrowDown,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -19,8 +20,11 @@ import {
   BarChart3,
   Info,
   ExternalLink,
+  Lock,
+  ChevronRight,
 } from "lucide-react";
 
+import { ZKRemitLogo, ZKRemitWordmark } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,24 +57,24 @@ import {
 
 // ── Animation Variants ──────────────────────────────────────────────
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 },
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.4, 0.25, 1] } },
+  exit: { opacity: 0, y: -12 },
 };
 
 const staggerContainer = {
-  animate: { transition: { staggerChildren: 0.08 } },
+  animate: { transition: { staggerChildren: 0.06 } },
 };
 
 const scaleIn = {
-  initial: { opacity: 0, scale: 0.95 },
-  animate: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.95 },
+  initial: { opacity: 0, scale: 0.96 },
+  animate: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.25, 0.4, 0.25, 1] } },
+  exit: { opacity: 0, scale: 0.96 },
 };
 
 const slideInLeft = {
-  initial: { opacity: 0, x: -30 },
-  animate: { opacity: 1, x: 0 },
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.25, 0.4, 0.25, 1] } },
 };
 
 // ── Main Page ──────────────────────────────────────────────────────
@@ -120,18 +124,22 @@ export default function Home() {
       <div className="min-h-screen bg-background">
         {/* ─── Navbar ──────────────────────────────────────── */}
         <motion.header
-          className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+          className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
           initial={{ y: -60 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           <div className="container flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold tracking-tight">ZKRemit</span>
-              <Badge variant="secondary" className="ml-2 text-[10px]">
-                HashKey Chain
-              </Badge>
+            <div className="flex items-center gap-3">
+              <ZKRemitLogo size={28} />
+              <ZKRemitWordmark className="text-xl" />
+              <div className="ml-2 flex items-center gap-1.5 rounded-full border border-border/60 bg-secondary/50 px-2.5 py-0.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground">HashKey Chain</span>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -141,11 +149,12 @@ export default function Home() {
                 </Button>
               )}
               {wallet.isConnected ? (
-                <Badge variant="outline" className="px-3 py-1.5 font-mono text-sm">
-                  {shortenAddress(wallet.address!)}
-                </Badge>
+                <div className="flex items-center gap-2 rounded-full border border-border/60 bg-secondary/50 px-3 py-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="font-mono text-sm">{shortenAddress(wallet.address!)}</span>
+                </div>
               ) : (
-                <Button onClick={handleConnect} disabled={connecting} size="sm">
+                <Button onClick={handleConnect} disabled={connecting} size="sm" className="rounded-full px-4">
                   {connecting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -159,62 +168,69 @@ export default function Home() {
         </motion.header>
 
         {/* ─── Hero ────────────────────────────────────────── */}
-        <section className="container py-16 md:py-24">
-          <motion.div
-            className="mx-auto max-w-3xl text-center"
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-          >
-            <motion.div variants={fadeInUp}>
-              <Badge variant="secondary" className="mb-4">
-                <Zap className="mr-1 h-3 w-3" /> Powered by Zero-Knowledge Proofs
-              </Badge>
-            </motion.div>
-            <motion.h1
-              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
-              variants={fadeInUp}
+        <section className="relative overflow-hidden border-b border-border/30">
+          <div className="absolute inset-0 bg-grid bg-radial-fade" />
+          <div className="container relative py-20 md:py-28">
+            <motion.div
+              className="mx-auto max-w-3xl text-center"
+              initial="initial"
+              animate="animate"
+              variants={staggerContainer}
             >
-              Send Money Anywhere.{" "}
-              <span className="text-primary">Prove Nothing.</span>
-            </motion.h1>
-            <motion.p
-              className="mt-4 text-lg text-muted-foreground md:text-xl"
-              variants={fadeInUp}
-            >
-              ZK-compliant cross-border remittance. Verify your identity once with
-              HashKey KYC SBT, then send private, low-cost payments worldwide.
-            </motion.p>
-            <motion.div className="mt-8 flex flex-wrap items-center justify-center gap-4" variants={fadeInUp}>
-              {[
-                { icon: Shield, label: "ZK Privacy" },
-                { icon: Globe, label: "10 Corridors" },
-                { icon: Zap, label: "0.3% Fees" },
-                { icon: Clock, label: "~2 Min Settlement" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <item.icon className="h-4 w-4 text-primary" />
-                  {item.label}
+              <motion.div variants={fadeInUp} className="mb-6 flex justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span className="font-medium">Powered by Zero-Knowledge Proofs</span>
+                  <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                 </div>
-              ))}
+              </motion.div>
+              <motion.h1
+                className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
+                variants={fadeInUp}
+              >
+                Send Money Anywhere.{" "}
+                <span className="text-gradient">Prove Nothing.</span>
+              </motion.h1>
+              <motion.p
+                className="mx-auto mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
+                variants={fadeInUp}
+              >
+                ZK-compliant cross-border remittance on HashKey Chain. Verify your identity once, 
+                then send private, low-cost payments across 10 corridors.
+              </motion.p>
+              <motion.div className="mt-10 flex flex-wrap items-center justify-center gap-6" variants={fadeInUp}>
+                {[
+                  { icon: Shield, label: "ZK Privacy" },
+                  { icon: Globe, label: "10 Corridors" },
+                  { icon: Zap, label: "0.3% Fees" },
+                  { icon: Clock, label: "~2 Min Settlement" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                      <item.icon className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    {item.label}
+                  </div>
+                ))}
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </section>
 
         {/* ─── Main Content ────────────────────────────────── */}
-        <section className="container pb-24">
+        <section className="container py-12 pb-24">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mx-auto max-w-2xl">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="send" className="gap-1.5">
+            <TabsList className="grid w-full grid-cols-4 rounded-xl bg-secondary/60 p-1">
+              <TabsTrigger value="send" className="gap-1.5 rounded-lg data-[state=active]:shadow-sm">
                 <Send className="h-4 w-4" /> Send
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-1.5">
+              <TabsTrigger value="history" className="gap-1.5 rounded-lg data-[state=active]:shadow-sm">
                 <History className="h-4 w-4" /> History
               </TabsTrigger>
-              <TabsTrigger value="stats" className="gap-1.5">
+              <TabsTrigger value="stats" className="gap-1.5 rounded-lg data-[state=active]:shadow-sm">
                 <BarChart3 className="h-4 w-4" /> Stats
               </TabsTrigger>
-              <TabsTrigger value="how" className="gap-1.5">
+              <TabsTrigger value="how" className="gap-1.5 rounded-lg data-[state=active]:shadow-sm">
                 <Info className="h-4 w-4" /> How It Works
               </TabsTrigger>
             </TabsList>
@@ -245,17 +261,20 @@ export default function Home() {
         </section>
 
         {/* ─── Footer ──────────────────────────────────────── */}
-        <footer className="border-t py-8">
+        <footer className="border-t border-border/50 bg-secondary/20 py-8">
           <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-muted-foreground">
-              &copy; 2025 ZKRemit. Built on HashKey Chain for the Horizon Hackathon.
-            </p>
-            <div className="flex gap-4 text-sm text-muted-foreground">
-              <a href="https://hsk.xyz" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">
-                HashKey Chain
+            <div className="flex items-center gap-3">
+              <ZKRemitLogo size={20} />
+              <p className="text-sm text-muted-foreground">
+                &copy; 2026 ZKRemit. Built on HashKey Chain for the Horizon Hackathon.
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <a href="https://hsk.xyz" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-foreground transition-colors">
+                HashKey Chain <ExternalLink className="h-3 w-3" />
               </a>
-              <a href="https://hashkeyscan.io" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">
-                Explorer
+              <a href="https://hashkeyscan.io" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-foreground transition-colors">
+                Explorer <ExternalLink className="h-3 w-3" />
               </a>
             </div>
           </div>
@@ -320,17 +339,19 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
   };
 
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 glow-sm border-border/50">
       <AnimatePresence mode="wait">
         {step === "form" && (
           <motion.div key="form" {...scaleIn} transition={{ duration: 0.25 }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ArrowRightLeft className="h-5 w-5 text-primary" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <ArrowRightLeft className="h-4 w-4 text-primary" />
+                </div>
                 Send Remittance
               </CardTitle>
               <CardDescription>
-                Select a corridor and enter the amount to send. ZK proofs ensure your compliance data stays private.
+                Select a corridor and enter the amount. ZK proofs keep your compliance data private.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -386,10 +407,10 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
+                    <div className="rounded-xl border border-primary/10 bg-gradient-to-b from-primary/[0.03] to-transparent p-4 space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Exchange Rate</span>
-                        <span className="font-mono">1 USDT = {quote.exchangeRate.toLocaleString()} {selectedCorridor?.destCurrency}</span>
+                        <span className="font-mono text-xs">1 USDT = {quote.exchangeRate.toLocaleString()} {selectedCorridor?.destCurrency}</span>
                       </div>
                       <Separator />
                       <div className="flex items-center justify-between text-sm">
@@ -413,12 +434,12 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
             </CardContent>
             <CardFooter>
               {!wallet.isConnected ? (
-                <Button className="w-full" onClick={onConnect}>
+                <Button className="w-full rounded-xl" onClick={onConnect}>
                   <Wallet className="mr-2 h-4 w-4" /> Connect Wallet to Send
                 </Button>
               ) : (
                 <Button
-                  className="w-full"
+                  className="w-full rounded-xl"
                   disabled={!quote || !corridor || !amount}
                   onClick={() => setStep("review")}
                 >
@@ -436,7 +457,7 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
               <CardDescription>Review the details before sending. A ZK proof will be generated automatically.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-3">
+              <div className="rounded-xl border border-border/60 p-4 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-sm">Corridor</span>
                   <span className="font-medium">{selectedCorridor?.flag} {selectedCorridor?.name}</span>
@@ -447,7 +468,7 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
                   <span className="text-lg font-bold">{quote.sourceAmount} USDT</span>
                 </div>
                 <div className="flex justify-center">
-                  <ArrowRight className="h-5 w-5 text-primary" />
+                  <ArrowDown className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-sm">They Receive</span>
@@ -466,18 +487,18 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <Shield className="mt-0.5 h-4 w-4 text-primary shrink-0" />
-                <p className="text-xs text-muted-foreground">
+              <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <Lock className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   A zero-knowledge proof will verify your KYC status and compliance without revealing personal data on-chain.
                 </p>
               </div>
             </CardContent>
             <CardFooter className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep("form")}>
+              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setStep("form")}>
                 Back
               </Button>
-              <Button className="flex-1" onClick={handleSend} disabled={sending}>
+              <Button className="flex-1 rounded-xl" onClick={handleSend} disabled={sending}>
                 {sending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating ZK Proof...
@@ -494,26 +515,27 @@ function SendTab({ wallet, onConnect }: { wallet: WalletState; onConnect: () => 
 
         {step === "success" && (
           <motion.div key="success" {...scaleIn} transition={{ duration: 0.3 }}>
-            <CardContent className="flex flex-col items-center py-12 space-y-4">
+            <CardContent className="flex flex-col items-center py-16 space-y-5">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10"
               >
-                <CheckCircle2 className="h-16 w-16 text-emerald-500" />
+                <CheckCircle2 className="h-10 w-10 text-emerald-500" />
               </motion.div>
-              <h2 className="text-2xl font-bold">Transaction Submitted!</h2>
+              <h2 className="text-2xl font-bold">Transaction Submitted</h2>
               <p className="text-center text-muted-foreground max-w-sm">
                 ZK proof generated and verified. Your remittance of{" "}
                 <strong>{quote?.sourceAmount} USDT</strong> to{" "}
                 <strong>{selectedCorridor?.name}</strong> is being processed.
               </p>
-              <Badge variant="success" className="text-sm px-3 py-1">
+              <Badge variant="success" className="text-sm px-4 py-1.5">
                 Estimated: {quote?.estimatedTime}
               </Badge>
               <Button
                 variant="outline"
-                className="mt-4"
+                className="mt-4 rounded-xl"
                 onClick={() => {
                   setStep("form");
                   setQuote(null);
@@ -547,9 +569,11 @@ function HistoryTab({ wallet }: { wallet: WalletState }) {
 
   if (!wallet.isConnected) {
     return (
-      <Card className="mt-4">
+      <Card className="mt-4 border-border/50">
         <CardContent className="flex flex-col items-center py-12 text-center">
-          <Wallet className="h-12 w-12 text-muted-foreground mb-4" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">
+            <Wallet className="h-6 w-6 text-muted-foreground" />
+          </div>
           <p className="text-muted-foreground">Connect your wallet to view transaction history.</p>
         </CardContent>
       </Card>
@@ -557,10 +581,12 @@ function HistoryTab({ wallet }: { wallet: WalletState }) {
   }
 
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <History className="h-4 w-4 text-primary" />
+          </div>
           Transaction History
         </CardTitle>
       </CardHeader>
@@ -571,7 +597,9 @@ function HistoryTab({ wallet }: { wallet: WalletState }) {
           </div>
         ) : txns.length === 0 ? (
           <div className="flex flex-col items-center py-8 text-center">
-            <Clock className="h-10 w-10 text-muted-foreground mb-3" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-3">
+              <Clock className="h-6 w-6 text-muted-foreground" />
+            </div>
             <p className="text-muted-foreground">No transactions yet. Send your first remittance!</p>
           </div>
         ) : (
@@ -579,7 +607,7 @@ function HistoryTab({ wallet }: { wallet: WalletState }) {
             {txns.map((tx) => {
               const status = STATUS_LABELS[tx.status] || STATUS_LABELS.pending;
               return (
-                <motion.div key={tx.id} variants={fadeInUp} className="rounded-lg border p-4 flex items-center justify-between">
+                <motion.div key={tx.id} variants={fadeInUp} className="rounded-xl border border-border/60 p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
                   <div className="space-y-1">
                     <p className="font-medium">{tx.corridor}</p>
                     <p className="text-sm text-muted-foreground">
@@ -637,9 +665,9 @@ function StatsTab() {
         {stats ? (
           statCards.map((s) => (
             <motion.div key={s.label} variants={fadeInUp}>
-              <Card>
+              <Card className="border-border/50 hover:glow-sm transition-shadow duration-300">
                 <CardContent className="flex items-center gap-4 p-5">
-                  <div className="rounded-lg bg-primary/10 p-2.5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                     <s.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -658,7 +686,7 @@ function StatsTab() {
       </motion.div>
 
       {/* Corridors Grid */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg">Available Corridors</CardTitle>
         </CardHeader>
@@ -673,8 +701,8 @@ function StatsTab() {
               <motion.div
                 key={c.id}
                 variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                whileHover={{ scale: 1.01 }}
+                className="flex items-center justify-between rounded-xl border border-border/60 p-3 transition-colors hover:bg-muted/30"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{c.flag}</span>
@@ -722,10 +750,12 @@ function HowItWorksTab() {
   ];
 
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Info className="h-5 w-5 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Info className="h-4 w-4 text-primary" />
+          </div>
           How ZKRemit Works
         </CardTitle>
         <CardDescription>
@@ -742,7 +772,7 @@ function HowItWorksTab() {
           {steps.map((s, i) => (
             <motion.div key={s.title} variants={slideInLeft} className="flex gap-4">
               <div className="flex flex-col items-center">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-bold">
                   {i + 1}
                 </div>
                 {i < steps.length - 1 && <div className="mt-2 h-full w-px bg-border" />}
